@@ -692,16 +692,28 @@ do
   --  See `:help lsp-config` for information about keys and how to configure
   ---@type table<string, vim.lsp.Config>
   local servers = {
-    -- clangd = {},
+    -- C / C++
+    --  NOTE: clangd works best with a `compile_commands.json` in the project root.
+    --  CMake emits one with `-DCMAKE_EXPORT_COMPILE_COMMANDS=ON`; for Make, use `bear -- make`.
+    clangd = {},
+
+    -- Rust
+    --  NOTE: if you ever want inlay hints, code actions and macro expansion, swap this
+    --  for `mrcjkb/rustaceanvim` -- but configure one or the other, never both.
+    rust_analyzer = {},
+
+    -- Python
+    --  pyright does type checking; ruff does linting (and can format via conform).
+    pyright = {},
+    ruff = {},
+
+    -- JavaScript / TypeScript
+    --  Some languages (like typescript) have entire language plugins that can be useful:
+    --     https://github.com/pmizio/typescript-tools.nvim
+    --  But for many setups, the LSP (`ts_ls`) will work just fine
+    ts_ls = {},
+
     -- gopls = {},
-    -- pyright = {},
-    -- rust_analyzer = {},
-    --
-    -- Some languages (like typescript) have entire language plugins that can be useful:
-    --    https://github.com/pmizio/typescript-tools.nvim
-    --
-    -- But for many setups, the LSP (`ts_ls`) will work just fine
-    -- ts_ls = {},
 
     stylua = {}, -- Used to format Lua code
 
@@ -979,7 +991,7 @@ do
   -- NOTE: You can add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- require 'custom.plugins'
+  require 'custom.plugins'
 end
 
 -- The line beneath this is called `modeline`. See `:help modeline`
