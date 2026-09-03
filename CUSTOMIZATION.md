@@ -1,8 +1,8 @@
 # Kickstart Customization Notes
 
-Reference list of common modifications to this config. **Nothing here is applied yet** —
-this is a menu to work through once you've used the stock setup and found what actually
-bothers you.
+Reference list of common modifications to this config. Apart from the three items marked
+**DONE** in §1, nothing here is applied — this is a menu to work through once you've used
+the setup and found what actually bothers you.
 
 Environment verified 2026-09-03: Neovim 0.12.5, Ghostty, `JetBrainsMono Nerd Font`
 installed, and `rg` / `fd` / `make` / `cc` / `node` / `npm` / `python3` all present.
@@ -20,10 +20,10 @@ document is optional; this section is the config asking you a direct question.
 
 | Line | Setting | Current | Notes |
 |------|---------|---------|-------|
-| `102` | `vim.g.have_nerd_font` | `false` | You have JetBrainsMono Nerd Font. Set `true`. Drives icons in mini.icons, which-key, telescope, gitsigns. |
-| `694` | `servers` table | only `lua_ls` | Add a server per language you write. See §2. |
+| `102` | `vim.g.have_nerd_font` | **DONE** — `true` | JetBrainsMono Nerd Font is installed; Ghostty also has symbol fallback built in. Drives icons in mini.icons, which-key, telescope, gitsigns. |
+| `694` | `servers` table | **DONE** — see §2 | `clangd`, `rust_analyzer`, `pyright`, `ruff`, `ts_ls`, `lua_ls`. `gopls` left commented. |
 | `972-977` | Optional kickstart modules | all commented | Six opt-in plugin modules. See §3. |
-| `982` | `require 'custom.plugins'` | commented | **Gotcha:** the auto-loader in `lua/custom/plugins/init.lua` never runs until you uncomment this. Files you drop in that directory are silently ignored. |
+| `992` | `require 'custom.plugins'` | **DONE** — enabled | The auto-loader in `lua/custom/plugins/init.lua` now runs, so any `.lua` file you drop in that directory is picked up automatically. It was silently ignored before. |
 | `785` | `format_on_save` | disabled | `enabled_filetypes` is empty, so nothing formats on save. See §4. |
 | `801` | `formatters_by_ft` | empty | External formatters (prettier, black, rustfmt). See §4. |
 | `396` | Colorscheme | `tokyonight-night` | Variants already available: `-storm`, `-moon`, `-day`. |
@@ -43,24 +43,34 @@ Lower-stakes toggles in the same category:
 
 ## 2. Language servers
 
-Add entries to the `servers` table at `init.lua:694`. Mason installs them automatically
-on next start.
+**Currently enabled** in the `servers` table at `init.lua:694`, covering Python, Rust,
+C/C++, JavaScript and TypeScript:
+
+| Server | Language | Note |
+|--------|----------|------|
+| `clangd` | C / C++ | Wants a `compile_commands.json` in the project root — see below. |
+| `rust_analyzer` | Rust | Swap for `rustaceanvim` if you want inlay hints and macro expansion. Never both. |
+| `pyright` | Python | Type checking. |
+| `ruff` | Python | Linting; can also format via conform. |
+| `ts_ls` | JS / TS | `typescript-tools.nvim` is faster on large projects. |
+| `lua_ls` | Lua | Configured by kickstart, formatting delegated to stylua. |
+
+**clangd needs a compile database.** Without `compile_commands.json` it falls back to
+guessing flags and will report bogus missing-include errors. Generate it with:
+
+```sh
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build   # CMake
+bear -- make                                        # plain Make (brew install bear)
+```
+
+Symlink it to the project root if CMake put it in `build/`. This is the single most
+common cause of "clangd is broken."
+
+Others worth adding later:
 
 ```lua
-local servers = {
-  ts_ls = {},          -- TypeScript / JavaScript
-  pyright = {},        -- Python (type checking)
-  ruff = {},           -- Python (lint + format, fast)
-  gopls = {},          -- Go
-  rust_analyzer = {},  -- Rust
-  clangd = {},         -- C / C++
-  jsonls = {},
-  yamlls = {},
-  bashls = {},
-  html = {}, cssls = {},
-  taplo = {},          -- TOML
-  marksman = {},       -- Markdown
-}
+gopls = {}, jsonls = {}, yamlls = {}, bashls = {},
+html = {}, cssls = {}, taplo = {}, marksman = {},
 ```
 
 **Gotcha:** everything in this table is passed to `vim.lsp.config()` and `vim.lsp.enable()`
