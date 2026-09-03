@@ -276,12 +276,15 @@ vim.api.nvim_create_autocmd('FileType', {
 
 ## 9. Repository hygiene
 
-- `origin` currently points at `nvim-lua/kickstart.nvim`. Fork it, then:
-  ```sh
-  git remote rename origin upstream
-  git remote add origin git@github.com:<you>/kickstart.nvim.git
+- **DONE** — remotes are already set up the right way:
   ```
-  This also lets you `git fetch upstream` to see what changed upstream later.
+  origin    https://github.com/Wesley-Allen-01/nvim_config.git
+  upstream  https://github.com/nvim-lua/kickstart.nvim.git
+  ```
+  `master` tracks `origin/master`. Pull in later kickstart changes with
+  `git fetch upstream && git diff HEAD upstream/master -- init.lua` to review before
+  merging — upstream rewrites `init.lua` freely, so expect conflicts once you've
+  customized it.
 
 - `.gitignore:11` ignores `nvim-pack-lock.json`. That's there so the *upstream* repo
   avoids merge conflicts. In your own fork, un-ignore and commit it — it's what makes
