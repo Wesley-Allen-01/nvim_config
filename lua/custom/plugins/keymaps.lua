@@ -11,4 +11,17 @@ vim.keymap.set('n', '<leader>e', function()
   MiniFiles.open(vim.fn.filereadable(name) == 1 and name or nil)
 end, { desc = '[E]xplore files' })
 
-vim.keymap.set('i', 'jj', '<esc>', {desc = 'return to normal mode from insert'})
+vim.keymap.set('i', 'jj', '<esc>', { desc = 'Return to normal mode from insert' })
+
+-- Window creation and navigation. `splitright` is enabled in init.lua, so
+-- `:vnew` consistently opens the new empty window on the right.
+vim.keymap.set('n', '<leader>wn', '<cmd>vnew<CR>', { desc = 'Window: New on right' })
+vim.keymap.set('n', '<leader>wd', '<cmd>close<CR>', { desc = 'Window: Close current' })
+vim.keymap.set('n', '<leader>wh', '<C-w>h', { desc = 'Window: Focus left' })
+vim.keymap.set('n', '<leader>wj', '<C-w>j', { desc = 'Window: Focus below' })
+vim.keymap.set('n', '<leader>wk', '<C-w>k', { desc = 'Window: Focus above' })
+vim.keymap.set('n', '<leader>wl', '<C-w>l', { desc = 'Window: Focus right' })
+
+require('which-key').add {
+  { '<leader>w', group = '[W]indows' },
+}
