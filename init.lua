@@ -624,9 +624,16 @@ do
     rust_analyzer = {},
 
     -- Python
-    --  pyright does type checking; ruff does linting (and can format via conform).
-    pyright = {},
-    ruff = {},
+    --  ty does type checking and language intelligence; ruff handles linting
+    --  (and can format via conform).
+    ty = {},
+    ruff = {
+      -- ty owns semantic hover information (types, signatures, and docs).
+      -- Ruff remains responsible for lint diagnostics and code actions.
+      on_attach = function(client)
+        client.server_capabilities.hoverProvider = false
+      end,
+    },
 
     -- JavaScript / TypeScript
     --  Some languages (like typescript) have entire language plugins that can be useful:
@@ -719,10 +726,10 @@ do
       -- You can specify filetypes to autoformat on save here:
       local enabled_filetypes = {
         -- lua = true,
-        -- python = true,
+        python = true,
       }
       if enabled_filetypes[vim.bo[bufnr].filetype] then
-        return { timeout_ms = 500 }
+        return { timeout_ms = 2000 }
       else
         return nil
       end
@@ -733,8 +740,9 @@ do
     -- You can also specify external formatters in here.
     formatters_by_ft = {
       -- rust = { 'rustfmt' },
-      -- Conform can also run multiple formatters sequentially
-      -- python = { "isort", "black" },
+      -- Apply enabled safe lint fixes, format, then organize imports on every
+      -- Python format request (including format-on-save and `<leader>f`).
+      python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
       --
       -- You can use 'stop_after_first' to run the first available formatter from the list
       -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -742,6 +750,20 @@ do
   }
 
   vim.keymap.set({ 'n', 'v' }, '<leader>f', function() require('conform').format { async = true } end, { desc = '[F]ormat buffer' })
+
+  vim.api.nvim_create_autocmd('FileType', {
+    group = vim.api.nvim_create_augroup('python-ruff-keymaps', { clear = true }),
+    pattern = 'python',
+    callback = function(event)
+      vim.keymap.set('n', '<leader>cf', function()
+        require('conform').format { formatters = { 'ruff_fix' }, async = true }
+      end, { buffer = event.buf, desc = 'Python: Ruff fix' })
+
+      vim.keymap.set('n', '<leader>ci', function()
+        require('conform').format { formatters = { 'ruff_organize_imports' }, async = true }
+      end, { buffer = event.buf, desc = 'Python: Organize imports' })
+    end,
+  })
 end
 
 -- ============================================================

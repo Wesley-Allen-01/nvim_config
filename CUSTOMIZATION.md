@@ -21,11 +21,11 @@ document is optional; this section is the config asking you a direct question.
 | Line | Setting | Current | Notes |
 |------|---------|---------|-------|
 | `102` | `vim.g.have_nerd_font` | **DONE** — `true` | JetBrainsMono Nerd Font is installed; Ghostty also has symbol fallback built in. Drives icons in mini.icons, which-key, telescope, gitsigns. |
-| `694` | `servers` table | **DONE** — see §2 | `clangd`, `rust_analyzer`, `pyright`, `ruff`, `ts_ls`, `lua_ls`. `gopls` left commented. |
+| `694` | `servers` table | **DONE** — see §2 | `clangd`, `rust_analyzer`, `ty`, `ruff`, `ts_ls`, `lua_ls`. `gopls` left commented. |
 | `972-977` | Optional kickstart modules | all commented | Six opt-in plugin modules. See §3. |
 | `992` | `require 'custom.plugins'` | **DONE** — enabled | The auto-loader in `lua/custom/plugins/init.lua` now runs, so any `.lua` file you drop in that directory is picked up automatically. It was silently ignored before. |
-| `785` | `format_on_save` | disabled | `enabled_filetypes` is empty, so nothing formats on save. See §4. |
-| `801` | `formatters_by_ft` | empty | External formatters (prettier, black, rustfmt). See §4. |
+| `785` | `format_on_save` | Python enabled | Python files are formatted by Ruff on save. See §4. |
+| `801` | `formatters_by_ft` | Ruff for Python | Python runs Ruff fixes, formatting, and import organization; other external formatters remain optional. See §4. |
 | `396` | Colorscheme | `tokyonight-night` | Variants already available: `-storm`, `-moon`, `-day`. |
 | `910` | Treesitter parsers | 9 base parsers | Low priority — others auto-install on first FileType. |
 
@@ -50,8 +50,8 @@ C/C++, JavaScript and TypeScript:
 |--------|----------|------|
 | `clangd` | C / C++ | Wants a `compile_commands.json` in the project root — see below. |
 | `rust_analyzer` | Rust | Swap for `rustaceanvim` if you want inlay hints and macro expansion. Never both. |
-| `pyright` | Python | Type checking. |
-| `ruff` | Python | Linting; can also format via conform. |
+| `ty` | Python | Type checking and language intelligence. |
+| `ruff` | Python | Linting and code actions; formatting runs through conform. |
 | `ts_ls` | JS / TS | `typescript-tools.nvim` is faster on large projects. |
 | `lua_ls` | Lua | Configured by kickstart, formatting delegated to stylua. |
 
