@@ -1,29 +1,27 @@
 # Wesley's Neovim config
 
-My Neovim setup, based on [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim). The main configuration lives in `init.lua`; personal plugins and mappings live under `lua/custom/plugins/`. The leader key is **Space**.
+This is the **Windows-compatible branch** of my [kickstart.nvim](https://github.com/nvim-lua/kickstart.nvim) setup. Start with [WINDOWS.md](WINDOWS.md) for a native Windows installation and a list of differences from `master`. The main configuration lives in `init.lua`; personal plugins and mappings live under `lua/custom/plugins/`. The leader key is **Space**.
 
 ## Getting started
 
-This config uses `vim.pack`, so use Neovim 0.12 or newer. Clone the repo into `~/.config/nvim` (or your Neovim config directory) and start `nvim`. `vim.pack` installs the declared plugins and uses the committed `nvim-pack-lock.json` to select their revisions. A Nerd Font is enabled in the config; turn off `vim.g.have_nerd_font` in `init.lua` if you do not use one.
+Use Neovim 0.12 or newer. Clone this branch into `%LOCALAPPDATA%\nvim` and start `nvim` in PowerShell; see [WINDOWS.md](WINDOWS.md) for portable-tool and administrator-install options. `vim.pack` installs plugins from GitHub using Git and the committed `nvim-pack-lock.json`.
 
-For the full experience, install `git`, `ripgrep` (for live grep), `make` and a C compiler (for Telescope's optional native FZF matcher), and the language toolchains you use. Mason manages the configured language servers and Stylua. GitHub Copilot needs Node.js and a Copilot account; run `:Copilot setup` once to authenticate, then `:Copilot status` to check it.
-
-Use `:checkhealth` for general diagnostics, `:Mason` for language tools, and `:lua vim.pack.update()` when you want to update plugins. Update and commit `nvim-pack-lock.json` with intentional plugin upgrades.
+The editor starts without a Nerd Font, C compiler, Tree-sitter CLI, or Mason language tools. Install the optional tools you need later. `:checkhealth`, `:Mason`, `:Telescope keymaps`, and `:lua vim.pack.update()` are useful maintenance commands.
 
 ## What's installed
 
 | Area | Plugins and behavior |
 | --- | --- |
-| Interface | Tokyo Night (`tokyonight-night`), which-key hints, mini.statusline, mini.icons, and automatic indentation detection with guess-indent. |
-| Start screen | mini.starter with a rotating colored artwork gallery in `lua/custom/art/`. `:WesArt` reshuffles it, `:WesArt <name>` picks a piece, and `:WesArt list` shows names. |
-| Files and search | mini.files for browsing; Telescope for files, buffers, grep, help, keymaps, diagnostics, and LSP results. Telescope UI select and the native FZF matcher are enabled when available. |
-| Editing | mini.ai text objects, mini.surround, mini.comment, Tree-sitter highlighting and indentation, and todo-comments. mini.comment toggles **line** comments across a visual selection, using the filetype's comment syntax. |
+| Interface | Tokyo Night (`tokyonight-night`), which-key hints, mini.statusline, and automatic indentation detection with guess-indent. Nerd Font icons are disabled by default. |
+| Start screen | mini.starter with a lightweight **Hi Wesley** greeting and recent files. The artwork gallery is omitted from this branch. |
+| Files and search | mini.files for browsing; Telescope for files, buffers, grep, help, keymaps, diagnostics, and LSP results. Telescope UI select is enabled; the native FZF extension is omitted on Windows. |
+| Editing | mini.ai text objects, mini.surround, mini.comment, and todo-comments. Installed Tree-sitter parsers provide enhanced highlighting and indentation; parser installation is manual on this branch. mini.comment toggles **line** comments across a visual selection, using the filetype's comment syntax. |
 | Git | gitsigns for signs, hunk actions, blame, and diff views. |
-| Languages | Neovim LSP with Mason, mason-lspconfig, nvim-lspconfig, and fidget status messages. Configured servers: `clangd`, `rust_analyzer`, `ty`, `ruff`, `ts_ls`, and `lua_ls`; Mason also installs `stylua`. |
+| Languages | Neovim LSP with Mason, mason-lspconfig, nvim-lspconfig, and fidget status messages. Configured servers: `clangd`, `rust_analyzer`, `ty`, `ruff`, `ts_ls`, and `lua_ls`; Mason can install these tools and `stylua` on request; automatic tool installation on startup is disabled. |
 | Formatting | conform.nvim runs Ruff fixes, formatting, and import organization on Python save. `<leader>f` formats on demand. Other filetypes use LSP formatting when a server supports it. |
-| Completion | blink.cmp supplies LSP, path, and LuaSnip completion. GitHub's `copilot.vim` shows inline suggestions. Blink owns `<Tab>`: it accepts a visible Copilot suggestion first, then a Blink completion, then advances a snippet, then inserts a tab. |
+| Completion | blink.cmp supplies LSP, path, and LuaSnip completion. GitHub's `copilot.vim` shows inline suggestions when Node.js is on PATH; it is skipped otherwise. Blink owns `<Tab>`: it accepts a visible Copilot suggestion first, then a Blink completion, then advances a snippet, then inserts a tab. |
 
-Tree-sitter installs a base set of parsers (`bash`, `c`, `diff`, `html`, `lua`, `luadoc`, `markdown`, `markdown_inline`, `query`, `vim`, `vimdoc`) and can install others when their filetype is opened. `clangd` works best with a project `compile_commands.json`.
+Tree-sitter uses parsers already installed in your Neovim data directory. Install or update parsers manually once the Tree-sitter CLI and a C compiler are available. `clangd` works best with a project `compile_commands.json`.
 
 ## Keymaps
 
@@ -47,7 +45,7 @@ Tree-sitter installs a base set of parsers (`bash`, `c`, `diff`, `html`, `lua`, 
 | `<C-h>`, `<C-j>`, `<C-k>`, `<C-l>` | Normal | Focus splits in the same four directions. |
 | `jj` | Insert | Return to Normal mode. |
 | `<Tab>` | Insert | Accept Copilot, Blink completion, or next snippet placeholder; otherwise insert a tab. |
-| `<C-l>` | Insert | Accept the next word of a Copilot suggestion. |
+| `<C-l>` | Insert, with Node.js | Accept the next word of a Copilot suggestion. |
 | `<Esc><Esc>` | Terminal | Return to Normal mode. |
 
 | Keys | Mode | Action |
@@ -70,8 +68,6 @@ Tree-sitter installs a base set of parsers (`bash`, `c`, `diff`, `html`, `lua`, 
 
 - `init.lua`: editor options and the main plugin setup.
 - `lua/custom/plugins/init.lua`: loads each `.lua` file in that directory. `keymaps.lua` holds personal shortcuts, `copilot.lua` configures Copilot, and `starter.lua` defines the start screen.
-- `lua/custom/art/`: start screen gallery and its generator.
 - `lua/kickstart/plugins/`: optional upstream examples; only `gitsigns.lua` is currently loaded.
-- `CUSTOMIZATION.md`: older ideas and notes; use this README and the Lua source for current behavior.
 
-The `upstream` Git remote points to kickstart.nvim for updates. Personal mappings are kept in `lua/custom/plugins/keymaps.lua` so they are easier to preserve when pulling upstream changes.
+The `master` branch keeps the full artwork setup. The `upstream` Git remote points to kickstart.nvim for updates. Personal mappings are kept in `lua/custom/plugins/keymaps.lua` so they are easier to preserve when pulling upstream changes.

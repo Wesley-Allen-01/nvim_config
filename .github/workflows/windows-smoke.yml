@@ -1,0 +1,32 @@
+name: Windows startup smoke test
+
+on:
+  push:
+    branches:
+      - codex/windows-compatible
+  workflow_dispatch:
+
+jobs:
+  start-neovim:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: nvim
+      - name: Install portable Neovim
+        shell: pwsh
+        run: |
+          $archive = Join-Path $env:RUNNER_TEMP 'nvim-win64.zip'
+          Invoke-WebRequest 'https://github.com/neovim/neovim/releases/latest/download/nvim-win64.zip' -OutFile $archive
+          Expand-Archive $archive -DestinationPath $env:RUNNER_TEMP
+          Join-Path $env:RUNNER_TEMP 'nvim-win64\bin' | Out-File -FilePath $env:GITHUB_PATH -Append
+      - name: Start config and check Windows defaults
+        shell: pwsh
+        env:
+          XDG_CONFIG_HOME: ${{ github.workspace }}
+        run: |
+          $check = "lua assert(require('mini.starter').config.header == 'Hi Wesley'); assert(vim.fn.exists(':WesArt') == 0); assert(vim.fn.maparg('<leader>/', 'x') ~= ''); print('WINDOWS_SMOKE_OK')"
+          $output = & nvim --headless -i NONE -c $check -c 'qa!' 2>&1
+          $text = $output | Out-String
+          Write-Host $text
+          if ($LASTEXITCODE -ne 0 -or $text -notmatch 'WINDOWS_SMOKE_OK') { throw 'Neovim startup smoke test failed' }

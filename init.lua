@@ -13,7 +13,7 @@ do
   vim.g.maplocalleader = ' '
 
   -- Set to true if you have a Nerd Font installed and selected in the terminal
-  vim.g.have_nerd_font = true
+  vim.g.have_nerd_font = false -- Enable after installing a Nerd Font on Windows
 
   -- [[ Setting options ]]
   --  See `:help vim.o`
@@ -214,7 +214,7 @@ do
       local kind = ev.data.kind
       if kind ~= 'install' and kind ~= 'update' then return end
 
-      if name == 'telescope-fzf-native.nvim' and vim.fn.executable 'make' == 1 then
+      if name == 'telescope-fzf-native.nvim' and vim.fn.has 'win32' ~= 1 and vim.fn.executable 'make' == 1 then
         run_build(name, { 'make' }, ev.data.path)
         return
       end
@@ -224,11 +224,8 @@ do
         return
       end
 
-      if name == 'nvim-treesitter' then
-        if not ev.data.active then vim.cmd.packadd 'nvim-treesitter' end
-        vim.cmd 'TSUpdate'
-        return
-      end
+      -- Parser builds are manual on this branch; they require tree-sitter CLI
+      -- and a C compiler that may not be available on a work laptop.
     end,
   })
 end
@@ -411,7 +408,7 @@ do
     gh 'nvim-telescope/telescope.nvim',
     gh 'nvim-telescope/telescope-ui-select.nvim',
   }
-  if vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
+  if vim.fn.has 'win32' ~= 1 and vim.fn.executable 'make' == 1 then table.insert(telescope_plugins, gh 'nvim-telescope/telescope-fzf-native.nvim') end
 
   -- NOTE: You can install multiple plugins at once
   vim.pack.add(telescope_plugins)
@@ -712,7 +709,7 @@ do
     -- You can add other tools here that you want Mason to install
   })
 
-  require('mason-tool-installer').setup { ensure_installed = ensure_installed }
+  require('mason-tool-installer').setup { ensure_installed = ensure_installed, run_on_start = false }
 
   for name, server in pairs(servers) do
     vim.lsp.config(name, server)
@@ -822,8 +819,9 @@ do
       -- snippets or insert a tab. Copilot's own Tab mapping is disabled below.
       ['<Tab>'] = {
         function()
-          if vim.fn['copilot#GetDisplayedSuggestion']().text ~= '' then
-            return vim.fn['copilot#Accept']('')
+          if vim.fn.executable 'node' == 1 then
+            local ok, suggestion = pcall(vim.fn['copilot#GetDisplayedSuggestion'])
+            if ok and suggestion.text ~= '' then return vim.fn['copilot#Accept']('') end
           end
         end,
         'select_and_accept',
@@ -880,9 +878,8 @@ do
   -- NOTE: You can also specify a branch or a specific commit
   vim.pack.add { { src = gh 'nvim-treesitter/nvim-treesitter', version = 'main' } }
 
-  -- Ensure basic parsers are installed
-  local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' }
-  require('nvim-treesitter').install(parsers)
+  -- Existing parsers are used when available. Install or update parsers
+  -- manually after adding tree-sitter CLI and a C compiler.
 
   ---@param buf integer
   ---@param language string
@@ -905,26 +902,10 @@ do
     if has_indent_query then vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()" end
   end
 
-  local available_parsers = require('nvim-treesitter').get_available()
   vim.api.nvim_create_autocmd('FileType', {
     callback = function(args)
-      local buf, filetype = args.buf, args.match
-
-      local language = vim.treesitter.language.get_lang(filetype)
-      if not language then return end
-
-      local installed_parsers = require('nvim-treesitter').get_installed 'parsers'
-
-      if vim.tbl_contains(installed_parsers, language) then
-        -- Enable the parser if it is already installed
-        treesitter_try_attach(buf, language)
-      elseif vim.tbl_contains(available_parsers, language) then
-        -- If a parser is available in `nvim-treesitter`, auto-install it and enable it after the installation is done
-        require('nvim-treesitter').install(language):await(function() treesitter_try_attach(buf, language) end)
-      else
-        -- Try to enable treesitter features in case the parser exists but is not available from `nvim-treesitter`
-        treesitter_try_attach(buf, language)
-      end
+      local language = vim.treesitter.language.get_lang(args.match)
+      if language then treesitter_try_attach(args.buf, language) end
     end,
   })
 end

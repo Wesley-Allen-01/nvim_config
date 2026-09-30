@@ -14,7 +14,9 @@ end, { desc = '[E]xplore files' })
 vim.keymap.set('i', 'jj', '<esc>', { desc = 'Return to normal mode from insert' })
 
 -- Accept Copilot ghost text one word at a time; <Tab> accepts the full suggestion.
-vim.keymap.set('i', '<C-l>', '<Plug>(copilot-accept-word)', { desc = 'Copilot: Accept next word' })
+if vim.fn.executable 'node' == 1 then
+  vim.keymap.set('i', '<C-l>', '<Plug>(copilot-accept-word)', { desc = 'Copilot: Accept next word' })
+end
 
 -- Return to the previous location after a jump, such as `gd`.
 vim.keymap.set('n', 'gb', '<C-o>', { desc = '[G]o [B]ack' })
