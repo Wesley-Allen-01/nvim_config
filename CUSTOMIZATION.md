@@ -1,8 +1,7 @@
 # Kickstart Customization Notes
 
-Reference list of common modifications to this config. Apart from the three items marked
-**DONE** in §1, nothing here is applied — this is a menu to work through once you've used
-the setup and found what actually bothers you.
+Historical notes and ideas for this config. Some settings and line references below have
+changed since these notes were written; see README.md and the Lua source for the current setup.
 
 Environment verified 2026-09-03: Neovim 0.12.5, Ghostty, `JetBrainsMono Nerd Font`
 installed, and `rg` / `fd` / `make` / `cc` / `node` / `npm` / `python3` all present.
@@ -194,7 +193,7 @@ plugins" comes from, so be skeptical of each one.
 **AI**
 - `coder/claudecode.nvim` — Claude Code inside Neovim.
 - `olimorris/codecompanion.nvim` — general chat/inline-edit.
-- `zbirenbaum/copilot.lua` (+ a bridge plugin for blink.cmp).
+- GitHub's official `copilot.vim` is enabled for VS Code-style inline completions.
 
 **Language-specific**
 - `mrcjkb/rustaceanvim` — replaces `rust_analyzer` config entirely; do not configure both.

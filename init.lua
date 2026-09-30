@@ -346,6 +346,12 @@ do
   -- - sr)'  - [S]urround [R]eplace [)] [']
   require('mini.surround').setup()
 
+  -- Toggle line comments for a visual selection with <leader>/.
+  -- mini.comment uses the buffer's commentstring (and Tree-sitter when available).
+  require('mini.comment').setup {
+    mappings = { comment_visual = '<leader>/' },
+  }
+
   -- File explorer you edit like a buffer.
   --  Open with `:lua MiniFiles.open()`; `g?` inside shows all mappings.
   --  Create/rename/delete by editing lines, then `=` to apply.
@@ -568,6 +574,7 @@ do
       -- WARN: This is not Goto Definition, this is Goto Declaration.
       --  For example, in C this would take you to the header.
       map('grD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+      map('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
 
       -- The following two autocommands are used to highlight references of the
       -- word under your cursor when your cursor rests there for a little while.
@@ -811,6 +818,18 @@ do
       --
       -- See `:help blink-cmp-config-keymap` for defining your own keymap
       preset = 'default',
+      -- Accept Copilot ghost text, then Blink completion, then jump through
+      -- snippets or insert a tab. Copilot's own Tab mapping is disabled below.
+      ['<Tab>'] = {
+        function()
+          if vim.fn['copilot#GetDisplayedSuggestion']().text ~= '' then
+            return vim.fn['copilot#Accept']('')
+          end
+        end,
+        'select_and_accept',
+        'snippet_forward',
+        'fallback',
+      },
 
       -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
       --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
